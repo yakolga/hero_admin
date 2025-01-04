@@ -1,18 +1,68 @@
-
-
-// Задача для этого компонента:
-// Реализовать создание нового героя с введенными данными. Он должен попадать
-// в общее состояние и отображаться в списке + фильтроваться
-// Уникальный идентификатор персонажа можно сгенерировать через uiid
-// Усложненная задача:
-// Персонаж создается и в файле json при помощи метода POST
-// Дополнительно:
-// Элементы <option></option> желательно сформировать на базе
-// данных из фильтров
+import {useHttp} from '../../hooks/http.hook';
+import { useDispatch, useSelector } from 'react-redux';
+import { useState, useEffect, useId } from 'react';
+import { filtersFetching, filtersFetched, filtersFetchingError} from '../../actions';
+import { heroeAdded } from '../../actions';
+import { v4 as uuidv4 } from 'uuid';
 
 const HeroesAddForm = () => {
+    const {filters, filtersLoadingStatus} = useSelector(state => state);
+    const {heroes, heroesLoadingStatus} = useSelector(state => state);
+
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [element, setElement] = useState('');
+    const {request} = useHttp();
+
+    const dispatch = useDispatch();
+    const id = useId();
+
+    useEffect(() => {
+        dispatch(filtersFetching());
+        request("http://localhost:3001/filters")
+            .then(data => dispatch(filtersFetched(data)))
+            .catch(() => dispatch(filtersFetchingError()))
+
+        // eslint-disable-next-line
+    }, []);
+
+    function renderFilters(filters, status) {
+        if (status === 'loading') {
+            return <option>Загрузка элементов</option>
+        } else if (status === 'error') {
+            return <option>Ошибка загрузки</option>
+        }
+
+        if (filters && filters.length > 0) {
+            return filters.map(({name, label}) => 
+                name !== 'all' ? <option key={name} value={name}>{label}</option> : null
+            );
+        }
+    }
+
+    function onSubmitHandler(e) {
+        e.preventDefault();
+
+        if (name !== "" && description !== "" && element !== "") {
+            const newHero = {
+                id: uuidv4(), 
+                name: name, 
+                description: description, 
+                element: element
+            }
+    
+            request("http://localhost:3001/heroes", "POST", JSON.stringify(newHero))
+                .then(dispatch(heroeAdded(newHero)))
+                .catch(err => console.log(err));
+        }
+
+        setName('');
+        setDescription('');
+        setElement('');
+    }
+
     return (
-        <form className="border p-4 shadow-lg rounded">
+        <form className="border p-4 shadow-lg rounded" onSubmit={(e) => onSubmitHandler(e)}>
             <div className="mb-3">
                 <label htmlFor="name" className="form-label fs-4">Имя нового героя</label>
                 <input 
@@ -21,7 +71,9 @@ const HeroesAddForm = () => {
                     name="name" 
                     className="form-control" 
                     id="name" 
-                    placeholder="Как меня зовут?"/>
+                    placeholder="Как меня зовут?" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)}/>
             </div>
 
             <div className="mb-3">
@@ -32,7 +84,10 @@ const HeroesAddForm = () => {
                     className="form-control" 
                     id="text" 
                     placeholder="Что я умею?"
-                    style={{"height": '130px'}}/>
+                    style={{"height": '130px'}}
+                    value={description}
+                    onChange={(e) => setDescription((e.target.value))}
+                    />
             </div>
 
             <div className="mb-3">
@@ -41,12 +96,11 @@ const HeroesAddForm = () => {
                     required
                     className="form-select" 
                     id="element" 
-                    name="element">
-                    <option >Я владею элементом...</option>
-                    <option value="fire">Огонь</option>
-                    <option value="water">Вода</option>
-                    <option value="wind">Ветер</option>
-                    <option value="earth">Земля</option>
+                    name="element"
+                    value={element}
+                    onChange={(e) => setElement(e.target.value)}>
+                    <option value="">Я владею элементом...</option>
+                    {renderFilters(filters, filtersLoadingStatus)}
                 </select>
             </div>
 

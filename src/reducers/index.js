@@ -28,6 +28,28 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 heroes: newHeroesList
             }
+        case 'FILTERS_FETCHING':
+            return {
+                ...state,
+                filtersLoadingStatus: 'loading'
+            }
+        case 'FILTERS_FETCHED':
+            return {
+                ...state,
+                filters: action.payload,
+                filtersLoadingStatus: 'idle'
+            }
+        case 'FILTERS_FETCHING_ERROR':
+            return {
+                ...state,
+                filtersLoadingStatus: 'error'
+            }
+        case 'HERO_ADDED':
+            const newHeroArray = [...state.heroes, {id: action.payload.id, name: action.payload.name, description: action.payload.description, element: action.payload.element }]
+            return {
+                ...state,
+                heroes: newHeroArray
+            }
         default: return state
     }
 }
