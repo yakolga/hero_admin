@@ -1,16 +1,10 @@
 {
   "heroes": [
     {
-      "id": 1,
-      "name": "Первый герой",
-      "description": "Первый герой в рейтинге!",
+      "id": "b80976c3-d7f2-4192-937c-497b8a162b36",
+      "name": "Ольга",
+      "description": "щдпф123",
       "element": "fire"
-    },
-    {
-      "id": ":r0:",
-      "name": "test",
-      "description": "test",
-      "element": "water"
     }
   ],
   "filters": [

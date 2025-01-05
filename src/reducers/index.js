@@ -1,7 +1,9 @@
 const initialState = {
     heroes: [],
     heroesLoadingStatus: 'idle',
-    filters: []
+    filters: [],
+    activeFilter: 'all',
+    filteredHeroes: []
 }
 
 const reducer = (state = initialState, action) => {
@@ -15,6 +17,7 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 heroes: action.payload,
+                filteredHeroes: state.activeFilter === 'all' ? action.payload : action.payload.filter(elem => elem === state.activeFilter),
                 heroesLoadingStatus: 'idle'
             }
         case 'HEROES_FETCHING_ERROR':
@@ -26,7 +29,8 @@ const reducer = (state = initialState, action) => {
             const newHeroesList = state.heroes.filter(hero => hero.id !== action.payload);
             return {
                 ...state,
-                heroes: newHeroesList
+                heroes: newHeroesList,
+                filteredHeroes: state.activeFilter === 'all' ? newHeroesList : newHeroesList.filter(elem => elem.element === state.activeFilter)
             }
         case 'FILTERS_FETCHING':
             return {
@@ -48,7 +52,15 @@ const reducer = (state = initialState, action) => {
             const newHeroArray = [...state.heroes, {id: action.payload.id, name: action.payload.name, description: action.payload.description, element: action.payload.element }]
             return {
                 ...state,
-                heroes: newHeroArray
+                heroes: newHeroArray,
+                filteredHeroes: state.activeFilter === 'all' ? newHeroArray : newHeroArray.filter(elem => elem.element === state.activeFilter)
+            }
+        case 'FILTER_CHANGED':
+            const filteredHeroes = [...state.heroes.filter(elem => elem.element === action.payload)];
+            return {
+                ...state,
+                activeFilter: action.payload,
+                filteredHeroes: action.payload === 'all' ? state.heroes : filteredHeroes
             }
         default: return state
     }

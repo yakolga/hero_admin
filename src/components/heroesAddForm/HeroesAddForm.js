@@ -1,30 +1,17 @@
 import {useHttp} from '../../hooks/http.hook';
 import { useDispatch, useSelector } from 'react-redux';
-import { useState, useEffect, useId } from 'react';
-import { filtersFetching, filtersFetched, filtersFetchingError} from '../../actions';
+import { useState } from 'react';
 import { heroeAdded } from '../../actions';
 import { v4 as uuidv4 } from 'uuid';
 
 const HeroesAddForm = () => {
     const {filters, filtersLoadingStatus} = useSelector(state => state);
-    const {heroes, heroesLoadingStatus} = useSelector(state => state);
-
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [element, setElement] = useState('');
     const {request} = useHttp();
 
     const dispatch = useDispatch();
-    const id = useId();
-
-    useEffect(() => {
-        dispatch(filtersFetching());
-        request("http://localhost:3001/filters")
-            .then(data => dispatch(filtersFetched(data)))
-            .catch(() => dispatch(filtersFetchingError()))
-
-        // eslint-disable-next-line
-    }, []);
 
     function renderFilters(filters, status) {
         if (status === 'loading') {

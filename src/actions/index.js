@@ -49,3 +49,10 @@ export const heroeAdded = (hero) => {
         payload: hero
     }
 }
+
+export const activeFilterChanged = (filter) => {
+    return {
+        type: 'FILTER_CHANGED',
+        payload: filter
+    }
+}
